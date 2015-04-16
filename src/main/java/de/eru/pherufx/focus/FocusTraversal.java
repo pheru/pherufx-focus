@@ -39,16 +39,33 @@ public final class FocusTraversal {
         groups.remove(name);
     }
 
-    public static void createSingleFocusTraversal(Node from, Node to) {
-        from.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
+    public static void setSingleFocusTraversalForNode(Node node, Node focusForwardTarget, Node focusBackwardTarget) {
+        node.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
             if (event.getCode() == KeyCode.TAB) {
                 event.consume();
-                to.requestFocus();
+                if (event.isShiftDown() && focusBackwardTarget != null) {
+                    focusBackwardTarget.requestFocus();
+                } else if (focusForwardTarget != null) {
+                    focusForwardTarget.requestFocus();
+                }
             }
         });
     }
-    
-    protected static void validateGroup(String name, FocusTraversalGroup group){
+
+    public static void setTabKeyEventHandlerForNode(Node node, Runnable tabForward, Runnable tabBackwards) {
+        node.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
+            if (event.getCode() == KeyCode.TAB) {
+                event.consume();
+                if (event.isShiftDown() && tabBackwards != null) {
+                    tabBackwards.run();
+                } else if (tabForward != null) {
+                    tabForward.run();
+                 }
+            }
+        });
+    }
+
+    protected static void validateGroup(String name, FocusTraversalGroup group) {
         if (FocusTraversal.groups.containsValue(group)) {
             throw new GroupAlreadyRegisteredException("The name of an already registered FocusTraversalGroup must not be changed!");
         } else if (FocusTraversal.groups.containsKey(name)) {
