@@ -71,7 +71,7 @@ public class FocusTraversalGroup {
         };
     }
 
-    public void clear() {
+    public void cleanUp() {
         for (int i = 0; i < nodes.size(); i++) {
             nodes.get(i).removeEventHandler(KeyEvent.KEY_PRESSED, eventHandlers.get(nodes.get(i)));
         }

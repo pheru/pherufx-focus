@@ -35,7 +35,7 @@ public final class FocusTraversal {
     }
 
     public static void removeFocusTraversalGroup(String name) {
-        groups.get(name).clear();
+        groups.get(name).cleanUp();
         groups.remove(name);
     }
 
