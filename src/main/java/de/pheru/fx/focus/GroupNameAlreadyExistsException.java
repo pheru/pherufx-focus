@@ -1,4 +1,4 @@
-package de.eru.pherufx.focus;
+package de.pheru.fx.focus;
 
 /**
  *
