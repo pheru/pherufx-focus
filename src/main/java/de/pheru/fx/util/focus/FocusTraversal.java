@@ -1,4 +1,4 @@
-package de.pheru.fx.focus;
+package de.pheru.fx.util.focus;
 
 import java.util.HashMap;
 import java.util.Map;
