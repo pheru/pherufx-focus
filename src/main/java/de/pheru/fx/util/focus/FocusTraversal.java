@@ -1,8 +1,7 @@
 package de.pheru.fx.util.focus;
 
-import java.util.HashMap;
-import java.util.Map;
 import javafx.scene.Node;
+import javafx.scene.control.ComboBox;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
@@ -12,48 +11,24 @@ import javafx.scene.input.KeyEvent;
  */
 public final class FocusTraversal {
 
-    protected static final Map<String, FocusTraversalGroup> groups = new HashMap<>();
-
     private FocusTraversal() {
     }
 
-    public static FocusTraversalGroup createFocusTraversalGroup(String name) {
-        FocusTraversalGroup group = new FocusTraversalGroup();
-        validateGroup(name, group);
-        groups.put(name, group);
-        return group;
-    }
-
-    public static FocusTraversalGroup createFocusTraversalGroup(String name, Node... nodes) {
-        FocusTraversalGroup group = createFocusTraversalGroup(name);
-        group.getNodes().addAll(nodes);
-        return group;
-    }
-
-    public static FocusTraversalGroup getFocusTraversalGroup(String name) {
-        return groups.get(name);
-    }
-
-    public static void removeFocusTraversalGroup(String name) {
-        groups.get(name).cleanUp();
-        groups.remove(name);
-    }
-
     public static void setSingleFocusTraversalForNode(Node node, Node focusForwardTarget, Node focusBackwardTarget) {
-        node.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
+        getFocusableForNode(node).addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
             if (event.getCode() == KeyCode.TAB) {
                 event.consume();
                 if (event.isShiftDown() && focusBackwardTarget != null) {
-                    focusBackwardTarget.requestFocus();
+                    getFocusableForNode(focusBackwardTarget).requestFocus();
                 } else if (focusForwardTarget != null) {
-                    focusForwardTarget.requestFocus();
+                    getFocusableForNode(focusForwardTarget).requestFocus();
                 }
             }
         });
     }
 
     public static void setTabKeyEventHandlerForNode(Node node, Runnable tabForward, Runnable tabBackwards) {
-        node.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
+        getFocusableForNode(node).addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
             if (event.getCode() == KeyCode.TAB) {
                 event.consume();
                 if (event.isShiftDown() && tabBackwards != null) {
@@ -65,11 +40,13 @@ public final class FocusTraversal {
         });
     }
 
-    protected static void validateGroup(String name, FocusTraversalGroup group) {
-        if (FocusTraversal.groups.containsValue(group)) {
-            throw new GroupAlreadyRegisteredException("The name of an already registered FocusTraversalGroup must not be changed!");
-        } else if (FocusTraversal.groups.containsKey(name)) {
-            throw new GroupNameAlreadyExistsException("FocusTraversalGroup-name \"" + name + "\" already exists!");
+    protected static Node getFocusableForNode(Node node) {
+        if (node instanceof ComboBox) {
+            ComboBox comboBox = (ComboBox) node;
+            if (comboBox.isEditable()) {
+                return comboBox.getEditor();
+            }
         }
+        return node;
     }
 }
