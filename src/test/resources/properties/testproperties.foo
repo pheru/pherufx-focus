@@ -1,0 +1,17 @@
+#comment
+stringKey=stringValue
+stringKeyEmpty=
+integerKey=1234
+integerKeyEmpty=
+integerKeyInvalid=Invalid
+longKey=123456
+longKeyEmpty=
+longKeyInvalid=Invalid
+floatKey=12.34
+floatKeyNoDecimal=1234
+floatKeyEmpty=
+floatKeyInvalid=Invalid
+doubleKey=1234.56
+doubleKeyNoDecimal=123456
+doubleKeyEmpty=
+doubleKeyInvalid=Invalid
