@@ -1,10 +1,12 @@
 package de.pheru.fx.util.properties;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -69,6 +71,8 @@ public class ObservableProperties {
         final String value;
         if (property instanceof StringProperty) {
             value = ((StringProperty) property).get();
+        } else if (property instanceof BooleanProperty) {
+            value = String.valueOf(((BooleanProperty) property).get());
         } else if (property instanceof IntegerProperty) {
             value = String.valueOf(((IntegerProperty) property).get());
         } else if (property instanceof LongProperty) {
@@ -97,11 +101,27 @@ public class ObservableProperties {
         return stringProperty;
     }
 
-    public IntegerProperty integerProperty(final String key, final Integer defaultValue) {
+    public BooleanProperty booleanProperty(final String key, final boolean defaultValue) {
+        if (fxProperties.containsKey(key)) {
+            return (BooleanProperty) fxProperties.get(key);
+        }
+        final String propertyValue = properties.getProperty(key);
+        boolean value;
+        if (propertyValue != null) {
+            value = Boolean.valueOf(propertyValue);
+        } else {
+            value = defaultValue;
+        }
+        final BooleanProperty booleanProperty = new SimpleBooleanProperty(value);
+        fxProperties.put(key, booleanProperty);
+        return booleanProperty;
+    }
+
+    public IntegerProperty integerProperty(final String key, final int defaultValue) {
         if (fxProperties.containsKey(key)) {
             return (IntegerProperty) fxProperties.get(key);
         }
-        Integer value;
+        int value;
         try {
             value = Integer.valueOf(properties.getProperty(key));
         } catch (final NumberFormatException | NullPointerException e) {
@@ -112,11 +132,11 @@ public class ObservableProperties {
         return integerProperty;
     }
 
-    public LongProperty longProperty(final String key, final Long defaultValue) {
+    public LongProperty longProperty(final String key, final long defaultValue) {
         if (fxProperties.containsKey(key)) {
             return (LongProperty) fxProperties.get(key);
         }
-        Long value;
+        long value;
         try {
             value = Long.valueOf(properties.getProperty(key));
         } catch (final NumberFormatException | NullPointerException e) {
@@ -127,11 +147,11 @@ public class ObservableProperties {
         return longProperty;
     }
 
-    public FloatProperty floatProperty(final String key, final Float defaultValue) {
+    public FloatProperty floatProperty(final String key, final float defaultValue) {
         if (fxProperties.containsKey(key)) {
             return (FloatProperty) fxProperties.get(key);
         }
-        Float value;
+        float value;
         try {
             value = Float.valueOf(properties.getProperty(key));
         } catch (final NumberFormatException | NullPointerException e) {
@@ -142,11 +162,11 @@ public class ObservableProperties {
         return floatProperty;
     }
 
-    public DoubleProperty doubleProperty(final String key, final Double defaultValue) {
+    public DoubleProperty doubleProperty(final String key, final double defaultValue) {
         if (fxProperties.containsKey(key)) {
             return (DoubleProperty) fxProperties.get(key);
         }
-        Double value;
+        double value;
         try {
             value = Double.valueOf(properties.getProperty(key));
         } catch (final NumberFormatException | NullPointerException e) {

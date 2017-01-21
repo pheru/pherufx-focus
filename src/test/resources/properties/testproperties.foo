@@ -1,6 +1,8 @@
 #comment
 stringKey=stringValue
 stringKeyEmpty=
+booleanKey=true
+booleanKeyEmpty=
 integerKey=1234
 integerKeyEmpty=
 integerKeyInvalid=Invalid
