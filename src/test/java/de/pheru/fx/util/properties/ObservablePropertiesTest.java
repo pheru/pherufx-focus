@@ -93,6 +93,8 @@ public class ObservablePropertiesTest {
     @Test
     public void booleanProperty() throws Exception {
         assertEquals(true, observableProperties.booleanProperty("booleanKey", DEFAULT_BOOLEAN).get());
+        assertEquals(true, observableProperties.booleanProperty(new ObservablePropertyKey<>("booleanKey", DEFAULT_BOOLEAN)).get());
+        assertEquals(true, observableProperties.booleanProperty("booleanKey", DEFAULT_BOOLEAN).get());
         assertEquals(DEFAULT_BOOLEAN, observableProperties.booleanProperty("booleanKeyEmpty", DEFAULT_BOOLEAN).get());
         assertEquals(DEFAULT_BOOLEAN, observableProperties.booleanProperty("booleanKeyNull", DEFAULT_BOOLEAN).get());
     }

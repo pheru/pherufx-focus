@@ -88,6 +88,10 @@ public class ObservableProperties {
         return value;
     }
 
+    public StringProperty stringProperty(final ObservablePropertyKey<String> propertyKey) {
+        return stringProperty(propertyKey.getKey(), propertyKey.getDefaultValue());
+    }
+
     public StringProperty stringProperty(final String key, final String defaultValue) {
         if (fxProperties.containsKey(key)) {
             return (StringProperty) fxProperties.get(key);
@@ -99,6 +103,10 @@ public class ObservableProperties {
         final StringProperty stringProperty = new SimpleStringProperty(value);
         fxProperties.put(key, stringProperty);
         return stringProperty;
+    }
+
+    public BooleanProperty booleanProperty(final ObservablePropertyKey<Boolean> propertyKey) {
+        return booleanProperty(propertyKey.getKey(), propertyKey.getDefaultValue());
     }
 
     public BooleanProperty booleanProperty(final String key, final boolean defaultValue) {
@@ -117,6 +125,10 @@ public class ObservableProperties {
         return booleanProperty;
     }
 
+    public IntegerProperty integerProperty(final ObservablePropertyKey<Integer> propertyKey) {
+        return integerProperty(propertyKey.getKey(), propertyKey.getDefaultValue());
+    }
+
     public IntegerProperty integerProperty(final String key, final int defaultValue) {
         if (fxProperties.containsKey(key)) {
             return (IntegerProperty) fxProperties.get(key);
@@ -130,6 +142,10 @@ public class ObservableProperties {
         final IntegerProperty integerProperty = new SimpleIntegerProperty(value);
         fxProperties.put(key, integerProperty);
         return integerProperty;
+    }
+
+    public LongProperty longProperty(final ObservablePropertyKey<Long> propertyKey) {
+        return longProperty(propertyKey.getKey(), propertyKey.getDefaultValue());
     }
 
     public LongProperty longProperty(final String key, final long defaultValue) {
@@ -147,6 +163,10 @@ public class ObservableProperties {
         return longProperty;
     }
 
+    public FloatProperty floatProperty(final ObservablePropertyKey<Float> propertyKey) {
+        return floatProperty(propertyKey.getKey(), propertyKey.getDefaultValue());
+    }
+
     public FloatProperty floatProperty(final String key, final float defaultValue) {
         if (fxProperties.containsKey(key)) {
             return (FloatProperty) fxProperties.get(key);
@@ -160,6 +180,10 @@ public class ObservableProperties {
         final FloatProperty floatProperty = new SimpleFloatProperty(value);
         fxProperties.put(key, floatProperty);
         return floatProperty;
+    }
+
+    public DoubleProperty doubleProperty(final ObservablePropertyKey<Double> propertyKey) {
+        return doubleProperty(propertyKey.getKey(), propertyKey.getDefaultValue());
     }
 
     public DoubleProperty doubleProperty(final String key, final double defaultValue) {
