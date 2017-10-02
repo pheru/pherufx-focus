@@ -5,14 +5,17 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.util.StringConverter;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -31,6 +34,7 @@ public class ObservableProperties {
     private String filePath;
     private Properties properties;
     private Map<String, Property<?>> fxProperties;
+    private Map<Class<?>, StringConverter<?>> stringConverters;
 
     public ObservableProperties(final String filePath) {
         this.filePath = filePath;
@@ -42,6 +46,11 @@ public class ObservableProperties {
             }
         };
         fxProperties = new HashMap<>();
+        stringConverters = new HashMap<>();
+    }
+
+    public <T> void registerConverter(final Class<T> clazz, final StringConverter<T> converter) {
+        stringConverters.put(clazz, converter);
     }
 
     public void load() throws IOException {
@@ -81,11 +90,39 @@ public class ObservableProperties {
             value = String.valueOf(((FloatProperty) property).get());
         } else if (property instanceof DoubleProperty) {
             value = String.valueOf(((DoubleProperty) property).get());
+        } else if (property instanceof ObjectProperty) {
+            final Object object = ((ObjectProperty) property).get();
+            final StringConverter stringConverter = stringConverters.get(object.getClass());
+            value = stringConverter.toString(object);
         } else {
             // Should not be possible
             throw new IllegalArgumentException("Illegal type of property \"" + property.getName() + "\"!");
         }
         return value;
+    }
+
+    public <T> ObjectProperty<T> objectProperty(final ObservablePropertyKey<T> propertyKey) {
+        return objectProperty(propertyKey.getKey(), propertyKey.getDefaultValue());
+    }
+
+    public <T> ObjectProperty<T> objectProperty(final String key, final T defaultValue) {
+        if (fxProperties.containsKey(key)) {
+            return (ObjectProperty<T>) fxProperties.get(key);
+        }
+        final String propertyValue = properties.getProperty(key);
+        T value;
+        if (propertyValue != null) {
+            final StringConverter<T> stringConverter = (StringConverter<T>) stringConverters.get(defaultValue.getClass());
+            if (stringConverter == null) {
+                throw new IllegalStateException("No StringConverter registered for " + defaultValue.getClass() + "!");
+            }
+            value = stringConverter.fromString(propertyValue);
+        } else {
+            value = defaultValue;
+        }
+        final ObjectProperty<T> objectProperty = new SimpleObjectProperty<T>(value);
+        fxProperties.put(key, objectProperty);
+        return objectProperty;
     }
 
     public StringProperty stringProperty(final ObservablePropertyKey<String> propertyKey) {

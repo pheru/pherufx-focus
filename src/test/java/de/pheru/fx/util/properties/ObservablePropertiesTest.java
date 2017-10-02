@@ -2,6 +2,7 @@ package de.pheru.fx.util.properties;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.StringProperty;
+import javafx.util.StringConverter;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -10,6 +11,7 @@ import java.io.FileInputStream;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class ObservablePropertiesTest {
@@ -20,6 +22,7 @@ public class ObservablePropertiesTest {
     private static final long DEFAULT_LONG = 999999L;
     private static final float DEFAULT_FLOAT = 99.99F;
     private static final double DEFAULT_DOUBLE = 999.99;
+    private static TestObject DEFAULT_TESTOBJECT = new TestObject(99, "NeunUndNeunzig");
 
     private ObservableProperties observableProperties;
 
@@ -133,9 +136,52 @@ public class ObservablePropertiesTest {
         assertEquals(123456.0, observableProperties.doubleProperty("doubleKeyNoDecimal", DEFAULT_DOUBLE).get(), 0.0);
     }
 
+    @Test
+    public void objectProperty() throws Exception {
+        observableProperties.registerConverter(TestObject.class, new StringConverter<TestObject>() {
+            @Override
+            public String toString(TestObject object) {
+                return object.integer + "-" + object.string;
+            }
+
+            @Override
+            public TestObject fromString(String string) {
+                final String[] split = string.split("-");
+                return new TestObject(Integer.valueOf(split[0]), split[1]);
+            }
+        });
+        assertEquals(new TestObject(1, "Eins"), observableProperties.objectProperty("objectKey", DEFAULT_TESTOBJECT).get());
+    }
+
+    @Test
+    public void objectPropertyNoConverter() throws Exception {
+        try {
+            assertEquals(new TestObject(1, "Eins"), observableProperties.objectProperty("objectKey", DEFAULT_TESTOBJECT).get());
+            fail("Es wurde kein passender Converter registriert, Exception erwaret");
+        } catch (final Exception e) {
+            assertTrue("Anderen Exception-Text erwartet", e.getMessage().startsWith("No StringConverter registered for"));
+        }
+    }
+
     private String getAbsoluteResourcePath(final String resourcePath) throws Exception {
         final File file = new File(getClass().getClassLoader().getResource(resourcePath).getFile());
         return file.getAbsolutePath();
     }
 
+
+    private static class TestObject {
+        private Integer integer;
+        private String string;
+
+        private TestObject(Integer integer, String string) {
+            this.integer = integer;
+            this.string = string;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            TestObject o = (TestObject) obj;
+            return integer.equals(o.integer) && string.equals(o.string);
+        }
+    }
 }
