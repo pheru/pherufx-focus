@@ -1,43 +1,21 @@
 package de.pheru.fx.util.properties;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.FloatProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.LongProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleFloatProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleLongProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.util.StringConverter;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TreeSet;
+import java.io.*;
+import java.util.*;
 
 public class ObservableProperties {
 
-    private String filePath;
-    private Properties properties;
-    private Map<String, Property<?>> fxProperties;
-    private Map<Class<?>, StringConverter<?>> stringConverters;
+    protected static final String NO_FILEPATH_EXCEPTION_MSG = "No filepath provided! Use save(comments, filepath) or make sure to call load(filepath) before saving.";
 
-    public ObservableProperties(final String filePath) {
-        this.filePath = filePath;
+    private String filePath;
+    private final Properties properties;
+    private final Map<String, Property<?>> fxProperties;
+    private final Map<Class<?>, StringConverter<?>> stringConverters;
+
+    public ObservableProperties() {
         properties = new Properties() {
             // alphabetical key order
             @Override
@@ -49,24 +27,23 @@ public class ObservableProperties {
         stringConverters = new HashMap<>();
     }
 
-    public <T> void registerConverter(final Class<T> clazz, final StringConverter<T> converter) {
-        stringConverters.put(clazz, converter);
-    }
-
-    public void load() throws IOException {
+    public void load(final String filePath) throws IOException {
         properties.clear();
         fxProperties.clear();
         try (final InputStream inputStream = new FileInputStream(filePath)) {
             properties.load(inputStream);
         }
+        this.filePath = filePath;
     }
 
     public void save(final String comments) throws IOException {
+        if (filePath == null) {
+            throw new IllegalStateException(NO_FILEPATH_EXCEPTION_MSG);
+        }
         save(comments, filePath);
     }
 
     public void save(final String comments, final String filePath) throws IOException {
-        this.filePath = filePath;
         for (final Map.Entry<String, Property<?>> entry : fxProperties.entrySet()) {
             final String value = getPropertyValueAsString(entry.getValue());
             properties.setProperty(entry.getKey(), value);
@@ -74,6 +51,19 @@ public class ObservableProperties {
         try (final OutputStream outputStream = new FileOutputStream(filePath)) {
             properties.store(outputStream, comments);
         }
+        this.filePath = filePath;
+    }
+
+    public <T> void registerConverter(final Class<T> clazz, final StringConverter<T> converter) {
+        stringConverters.put(clazz, converter);
+    }
+
+    public boolean contains(final ObservablePropertyKey<?> key) {
+        return contains(key.getKey());
+    }
+
+    public boolean contains(final String key) {
+        return properties.containsKey(key);
     }
 
     private String getPropertyValueAsString(final Property<?> property) {
@@ -95,7 +85,6 @@ public class ObservableProperties {
             final StringConverter stringConverter = stringConverters.get(object.getClass());
             value = stringConverter.toString(object);
         } else {
-            // Should not be possible
             throw new IllegalArgumentException("Illegal type of property \"" + property.getName() + "\"!");
         }
         return value;

@@ -10,9 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class ObservablePropertiesTest {
 
@@ -28,8 +26,8 @@ public class ObservablePropertiesTest {
 
     @Before
     public void setUp() throws Exception {
-        observableProperties = new ObservableProperties(new File("src/test/resources/properties/testproperties.foo").getAbsolutePath());
-        observableProperties.load();
+        observableProperties = new ObservableProperties();
+        observableProperties.load(new File("src/test/resources/properties/testproperties.foo").getAbsolutePath());
     }
 
     @Test
@@ -40,15 +38,14 @@ public class ObservablePropertiesTest {
                 fail("File already exists and could not be deleted");
             }
         }
-
-        observableProperties = new ObservableProperties(file.getAbsolutePath());
+        observableProperties = new ObservableProperties();
         observableProperties.stringProperty("newString", "new");
         observableProperties.integerProperty("newInteger", 123);
         observableProperties.longProperty("newLong", 12345L);
         observableProperties.floatProperty("newFloat", 123.45F);
         observableProperties.doubleProperty("newDouble", 12345.67);
         observableProperties.booleanProperty("newBoolean", true);
-        observableProperties.save("comment");
+        observableProperties.save("comment", file.getAbsolutePath());
 
         final Properties savedProperties = new Properties();
         try (final FileInputStream inputStream = new FileInputStream(file)) {
@@ -57,7 +54,9 @@ public class ObservablePropertiesTest {
         assertEquals("new", savedProperties.getProperty("newString"));
         assertEquals("12345", savedProperties.getProperty("newLong"));
 
-        file.delete();
+        if (!file.delete()) {
+            fail("Failed to delete file!");
+        }
     }
 
     @Test
@@ -83,7 +82,34 @@ public class ObservablePropertiesTest {
         assertEquals("newValue", savedProperties.getProperty("stringKey"));
         assertEquals("99.99", savedProperties.getProperty("doubleKey"));
 
-        newFile.delete();
+        if (!newFile.delete()) {
+            fail("Failed to delete file!");
+        }
+    }
+
+    @Test
+    public void saveNoFilePath() throws Exception {
+        try {
+            new ObservableProperties().save(null);
+            fail("Exception expected!");
+        } catch (final IllegalStateException e) {
+            assertTrue(e.getMessage().endsWith(ObservableProperties.NO_FILEPATH_EXCEPTION_MSG));
+        }
+    }
+
+    @Test
+    public void contains() throws Exception {
+        assertTrue(observableProperties.contains("booleanKey"));
+        assertTrue(observableProperties.contains(new ObservablePropertyKey<>("booleanKey", DEFAULT_BOOLEAN)));
+        assertFalse(observableProperties.contains("notExistingKey"));
+        assertFalse(observableProperties.contains(new ObservablePropertyKey<>("notExistingKey", DEFAULT_BOOLEAN)));
+    }
+
+    @Test
+    public void loadedTwice() throws Exception {
+        assertTrue(observableProperties.contains("booleanKey"));
+        observableProperties.load(new File("src/test/resources/properties/emptyproperties.foo").getAbsolutePath());
+        assertFalse(observableProperties.contains("booleanKey"));
     }
 
     @Test
@@ -157,9 +183,9 @@ public class ObservablePropertiesTest {
     public void objectPropertyNoConverter() throws Exception {
         try {
             assertEquals(new TestObject(1, "Eins"), observableProperties.objectProperty("objectKey", DEFAULT_TESTOBJECT).get());
-            fail("Es wurde kein passender Converter registriert, Exception erwaret");
+            fail("Exception expected!");
         } catch (final Exception e) {
-            assertTrue("Anderen Exception-Text erwartet", e.getMessage().startsWith("No StringConverter registered for"));
+            assertTrue(e.getMessage().startsWith("No StringConverter registered for"));
         }
     }
 

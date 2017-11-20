@@ -5,16 +5,13 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
-/**
- *
- * @author Philipp Bruckner
- */
 public final class FocusTraversal {
 
     private FocusTraversal() {
+        //Utility-Class
     }
 
-    public static void setSingleFocusTraversalForNode(Node node, Node focusForwardTarget, Node focusBackwardTarget) {
+    public static void setSingleFocusTraversalForNode(final Node node, final Node focusForwardTarget, final Node focusBackwardTarget) {
         getFocusableForNode(node).addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
             if (event.getCode() == KeyCode.TAB) {
                 event.consume();
@@ -27,7 +24,7 @@ public final class FocusTraversal {
         });
     }
 
-    public static void setTabKeyEventHandlerForNode(Node node, Runnable tabForward, Runnable tabBackwards) {
+    public static void setTabKeyEventHandlerForNode(final Node node, final Runnable tabForward, final Runnable tabBackwards) {
         getFocusableForNode(node).addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
             if (event.getCode() == KeyCode.TAB) {
                 event.consume();
@@ -35,14 +32,14 @@ public final class FocusTraversal {
                     tabBackwards.run();
                 } else if (tabForward != null) {
                     tabForward.run();
-                 }
+                }
             }
         });
     }
 
-    protected static Node getFocusableForNode(Node node) {
+    protected static Node getFocusableForNode(final Node node) {
         if (node instanceof ComboBox) {
-            ComboBox comboBox = (ComboBox) node;
+            final ComboBox comboBox = (ComboBox) node;
             if (comboBox.isEditable()) {
                 return comboBox.getEditor();
             }

@@ -12,13 +12,10 @@ import javafx.scene.input.KeyEvent;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @author Philipp Bruckner
- */
 public class FocusTraversalGroup {
 
-    private static final Map<String, FocusTraversalGroup> groups = new HashMap<>();
     private static final String DEFAULT_GROUP_NAME = "FocusTraversalGroup_Default_";
+    private static final Map<String, FocusTraversalGroup> groups = new HashMap<>();
     private static int defaultCounter = 0;
 
     private final ObservableList<Node> nodes = FXCollections.observableArrayList();
@@ -31,18 +28,18 @@ public class FocusTraversalGroup {
         defaultCounter++;
     }
 
-    public FocusTraversalGroup(Node... nodes) {
+    public FocusTraversalGroup(final Node... nodes) {
         this(DEFAULT_GROUP_NAME + defaultCounter);
         defaultCounter++;
         this.nodes.addAll(nodes);
     }
 
-    public FocusTraversalGroup(@NamedArg("name") String name, Node... nodes) {
+    public FocusTraversalGroup(@NamedArg("name") final String name, final Node... nodes) {
         this(name);
         this.nodes.addAll(nodes);
     }
 
-    public FocusTraversalGroup(@NamedArg("name") String name) {
+    public FocusTraversalGroup(@NamedArg("name") final String name) {
         this.name = name;
         groups.put(name, this);
         nodes.addListener((ListChangeListener.Change<? extends Node> c) -> {
@@ -110,11 +107,11 @@ public class FocusTraversalGroup {
         return name;
     }
 
-    public static FocusTraversalGroup getFocusTraversalGroup(String name) {
+    public static FocusTraversalGroup getFocusTraversalGroup(final String name) {
         return groups.get(name);
     }
 
-    public static void removeFocusTraversalGroup(String name) {
+    public static void removeFocusTraversalGroup(final String name) {
         groups.get(name).cleanUp();
         groups.remove(name);
     }
